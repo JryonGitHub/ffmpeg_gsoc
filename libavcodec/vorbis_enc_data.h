@@ -501,4 +501,115 @@ static const struct {
     { 3, 2, 3, { -1, 12, 13, 14 } },
 };
 
+
+static const uint8_t swb_size_128_96[] = {
+    4, 4, 4, 4, 4, 4, 8, 8, 8, 16, 28, 36
+};
+
+static const uint8_t swb_size_128_64[] = {
+    4, 4, 4, 4, 4, 4, 8, 8, 8, 16, 28, 36
+};
+
+static const uint8_t swb_size_128_48[] = {
+    4, 4, 4, 4, 4, 8, 8, 8, 12, 12, 12, 16, 16, 16
+};
+
+static const uint8_t swb_size_128_24[] = {
+    4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 12, 12, 16, 16, 20
+};
+
+static const uint8_t swb_size_128_16[] = {
+    4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 12, 12, 16, 20, 20
+};
+
+static const uint8_t swb_size_128_8[] = {
+    4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 12, 16, 20, 20
+};
+
+static const uint8_t swb_size_1024_96[] = {
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8,
+    12, 12, 12, 12, 12, 16, 16, 24, 28, 36, 44,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
+};
+
+static const uint8_t swb_size_1024_64[] = {
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8,
+    12, 12, 12, 16, 16, 16, 20, 24, 24, 28, 36,
+    40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40
+};
+
+static const uint8_t swb_size_1024_48[] = {
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8,
+    12, 12, 12, 12, 16, 16, 20, 20, 24, 24, 28, 28,
+    32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+    96
+};
+
+static const uint8_t swb_size_1024_32[] = {
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8,
+    12, 12, 12, 12, 16, 16, 20, 20, 24, 24, 28, 28,
+    32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32
+};
+
+static const uint8_t swb_size_1024_24[] = {
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    12, 12, 12, 12, 16, 16, 16, 20, 20, 24, 24, 28, 28,
+    32, 36, 36, 40, 44, 48, 52, 52, 64, 64, 64, 64, 64
+};
+
+static const uint8_t swb_size_1024_16[] = {
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 16, 16, 16, 16, 20, 20, 20, 24, 24, 28, 28,
+    32, 36, 40, 40, 44, 48, 52, 56, 60, 64, 64, 64
+};
+
+static const uint8_t swb_size_1024_8[] = {
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+    16, 16, 16, 16, 16, 16, 16, 20, 20, 20, 20, 24, 24, 24, 28, 28,
+    32, 36, 36, 40, 44, 48, 52, 56, 60, 64, 80
+};
+
+const uint8_t *ff_vorbis_swb_size_128[] = {
+    swb_size_128_96, swb_size_128_96, swb_size_128_64,
+    swb_size_128_48, swb_size_128_48, swb_size_128_48,
+    swb_size_128_24, swb_size_128_24, swb_size_128_16,
+    swb_size_128_16, swb_size_128_16, swb_size_128_8,
+    swb_size_128_8
+};
+
+const uint8_t *ff_vorbis_swb_size_1024[] = {
+    swb_size_1024_96, swb_size_1024_96, swb_size_1024_64,
+    swb_size_1024_48, swb_size_1024_48, swb_size_1024_32,
+    swb_size_1024_24, swb_size_1024_24, swb_size_1024_16,
+    swb_size_1024_16, swb_size_1024_16, swb_size_1024_8,
+    swb_size_1024_8
+};
+
+const int ff_vorbis_swb_size_128_len  = FF_ARRAY_ELEMS(ff_vorbis_swb_size_128);
+const int ff_vorbis_swb_size_1024_len = FF_ARRAY_ELEMS(ff_vorbis_swb_size_1024);
+
+/* duplicated from avpriv_mpeg4audio_sample_rates to avoid shared build
+ * failures */
+static const int mpeg4audio_sample_rates[16] = {
+    96000, 88200, 64000, 48000, 44100, 32000,
+    24000, 22050, 16000, 12000, 11025, 8000, 7350
+};
+
+enum WindowSequence {
+    ONLY_LONG_SEQUENCE,
+    LONG_START_SEQUENCE,
+    EIGHT_SHORT_SEQUENCE,
+    LONG_STOP_SEQUENCE,
+};
+
+const uint8_t ff_vorbis_num_swb_1024[] = {
+    41, 41, 47, 49, 49, 51, 47, 47, 43, 43, 43, 40, 40
+};
+
+const uint8_t ff_vorbis_num_swb_128[] = {
+    12, 12, 12, 14, 14, 14, 15, 15, 15, 15, 15, 15, 15
+};
+
+
+
 #endif /* AVCODEC_VORBIS_ENC_DATA_H */

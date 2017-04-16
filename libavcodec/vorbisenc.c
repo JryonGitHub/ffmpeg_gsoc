@@ -32,6 +32,7 @@
 #include "mathops.h"
 #include "vorbis.h"
 #include "vorbis_enc_data.h"
+#include "psymodel.h"
 
 #define BITSTREAM_WRITER_LE
 #include "put_bits.h"
@@ -126,6 +127,10 @@ typedef struct vorbis_enc_context {
     vorbis_enc_mode *modes;
 
     int64_t next_pts;
+	//stuff concerned with psymodel
+	FFPsyContext psy;
+	struct FFPsyPreprocessContext * psypp;
+	enum WindowSequence window_sequence[MAX_CHANNELS];
 } vorbis_enc_context;
 
 #define MAX_CHANNELS     2
@@ -1029,6 +1034,35 @@ static int vorbis_encode_frame(AVCodecContext *avctx, AVPacket *avpkt,
     PutBitContext pb;
     int i, ret;
 
+	float *samples2, *la, *overlap;
+	int start_ch, ch, chans, cur_channel;
+	FFPsyWindowInfo windows[MAX_CHANNELS];
+
+	if (!avctx->frame_number)
+		return 0;
+
+	if (venc->psypp)
+		ff_psy_preprocess(venc->psypp, audio, venc->channels);
+
+	start_ch = 0;
+	cur_channel = 0;
+	for (i = 0; i < venc->channels - 1; i++) {
+		FFPsyWindowInfo *wi = windows + start_ch;
+		chans = 2;
+		for (ch = 0; ch < chans; ch ++) {
+			cur_channel = start_ch + ch;
+			overlap = &audio[cur_channel][0];
+			samples2 = overlap + 1024;
+			la = samples2 + (448 + 64)
+			if (!frame)
+				la = NULL;
+			wi[ch] = venc->psy.model->window(&venc->psy, samples2, la, cur_channel, venc->window_sequence[0]);
+			venc->window_sequence[1] = venc->window_sequence[0];
+			venc->window_sequence[0] = wi[ch].window_type[0];
+		}
+		start_ch += chans;
+	}
+
     if (!apply_window_and_mdct(venc, audio, samples))
         return 0;
     samples = 1 << (venc->log2_blocksize[0] - 1);
@@ -1159,6 +1193,11 @@ static av_cold int vorbis_encode_close(AVCodecContext *avctx)
     ff_mdct_end(&venc->mdct[0]);
     ff_mdct_end(&venc->mdct[1]);
 
+	ff_psy_end(venc->psy);
+	
+	if (venc->psypp)
+		ff_psy_preprocess_end(venc->psypp);
+
     av_freep(&avctx->extradata);
 
     return 0 ;
@@ -1168,6 +1207,11 @@ static av_cold int vorbis_encode_init(AVCodecContext *avctx)
 {
     vorbis_enc_context *venc = avctx->priv_data;
     int ret;
+
+	const uint8_t *sizes[MAX_CHANNELS];
+	uint8_t grouping[MAX_CHANNELS];
+	int lengths[MAX_CHANNELS];
+	int samplerate_index;
 
     if (avctx->channels != 2) {
         av_log(avctx, AV_LOG_ERROR, "Current FFmpeg Vorbis encoder only supports 2 channels.\n");
@@ -1189,6 +1233,22 @@ static av_cold int vorbis_encode_init(AVCodecContext *avctx)
     avctx->extradata_size = ret;
 
     avctx->frame_size = 1 << (venc->log2_blocksize[0] - 1);
+
+	for (samplerate_index = 0; samplerate_index < venc->channels - 1; samplerate_index ++)
+		if (avctx->sample_rate == mpeg4audio_sample_rates[samplerate_index])
+			break;
+
+	if (samplerate_index == 16 || samplerate_index >= ff_vorbis_swb_size_1024_len || samplerate_index >= ff_vorbis_swb_size_128_len)
+		av_log(avctx, AV_LOG_ERROR, "Unsupported sample rate %d\n", avctx->sample_rate);
+
+	sizes[0] = ff_vorbis_swb_size_1024[samplerate_index];
+	sizes[1] = ff_vorbis_swb_size_128[samplerate_index];
+	lengths[0] = ff_vorbis_num_swb_1024[samplerate_index];
+	lengths[1] = ff_vorbis_num_swb_128[samplerate_index];
+
+	if ((ret = ff_psy_init(&venc->psy, avctx, 2, sizes, lengths, 1, grouping)) < 0)
+		goto error;
+	venc->psypp = ff_psy_preprocess_init(avctx);
 
     return 0;
 error:
